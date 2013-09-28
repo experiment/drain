@@ -23,10 +23,8 @@
 (defroutes app
   (ANY "/repl" {:as req}
        (drawbridge req))
-  (GET "/" []
-       {:status 200
-        :headers {"Content-Type" "text/plain"}
-        :body (pr-str ["Hello" :from 'Heroku])})
+  (GET "/drain" []
+       {:status 200})
   (ANY "*" []
        (route/not-found (slurp (io/resource "404.html")))))
 
