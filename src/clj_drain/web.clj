@@ -7,24 +7,12 @@
             [ring.middleware.session :as session]
             [ring.middleware.session.cookie :as cookie]
             [ring.adapter.jetty :as jetty]
-            [ring.middleware.basic-authentication :as basic]
-            [cemerick.drawbridge :as drawbridge]
-            [environ.core :refer [env]]))
-
-(defn- authenticated? [user pass]
-  ;; TODO: heroku config:add REPL_USER=[...] REPL_PASSWORD=[...]
-  (= [user pass] [(env :repl-user false) (env :repl-password false)]))
-
-(def ^:private drawbridge
-  (-> (drawbridge/ring-handler)
-      (session/wrap-session)
-      (basic/wrap-basic-authentication authenticated?)))
+            [environ.core :refer [env]]
+            [taoensso.timbre :as timbre :refer (trace debug info warn error fatal spy with-log-level)]))
 
 (defroutes app
-  (ANY "/repl" {:as req}
-       (drawbridge req))
   (GET "/drain" []
-       {:status 200})
+       (spy {:status 200}))
   (ANY "*" []
        (route/not-found (slurp (io/resource "404.html")))))
 
