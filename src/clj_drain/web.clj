@@ -11,8 +11,9 @@
             [taoensso.timbre :as timbre :refer (trace debug info warn error fatal spy with-log-level)]))
 
 (defroutes app
-  (POST "/drain" []
-       (spy {:status 200}))
+  (POST "/drain" {params :params}
+    (info params)
+    {:status 200})
   (route/not-found "Page not found"))
 
 (defn wrap-error-page [handler]
