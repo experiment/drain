@@ -13,8 +13,7 @@
 (defroutes app
   (GET "/drain" []
        (spy {:status 200}))
-  (ANY "*" []
-       (route/not-found (slurp (io/resource "404.html")))))
+  (route/not-found "Page not found"))
 
 (defn wrap-error-page [handler]
   (fn [req]
