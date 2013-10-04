@@ -4,7 +4,8 @@
         [org.httpkit.server]
         [compojure.core :only [defroutes GET POST DELETE ANY context]]
         [compojure.route :only [not-found] :as route]
-        [compojure.handler :only [site]]))
+        [compojure.handler :only [site]]
+        [taoensso.carmine :as car :refer (wcar)]))
 
 (defn drain [body]
   (let [body (slurp body)]
