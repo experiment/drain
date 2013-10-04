@@ -7,7 +7,13 @@
         [compojure.handler :only [site]]
         [taoensso.carmine :as car :refer (wcar)]))
 
-(defmacro redis* [& body] `(car/wcar {} ~@body))
+(def redis-conf
+  (let [port (Integer. (env :redis-port)) host (String. (env :redis-host)) password (String. (env :redis-password))]
+    {:spec {:host host :port port :password password}}))
+
+(defmacro redis* [& body]
+  (info redis-conf)
+  `(car/wcar redis-conf ~@body))
 
 (defn push-status [status-code]
   (info status-code)
