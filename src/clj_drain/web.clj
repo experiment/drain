@@ -6,13 +6,13 @@
         [compojure.route :only [not-found] :as route]
         [compojure.handler :only [site]]))
 
-(defn drain [body params]
-  (info (slurp body))
-  (info params))
+(defn drain [body]
+  (let [body (slurp body)]
+    (info (re-find #"status=([0-9]+)" body))))
 
 (defroutes all-routes
-  (POST "/drain" {body :body params :params}
-    (drain body params)
+  (POST "/drain" {body :body}
+    (drain body)
     {:status 200})
   (route/not-found "Page not found"))
 
