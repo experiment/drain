@@ -7,8 +7,11 @@
         [compojure.handler :only [site]]
         [taoensso.carmine :as car :refer (wcar)]))
 
+(defmacro redis* [& body] `(car/wcar {} ~@body))
+
 (defn push-status [status-code]
-  (info status-code))
+  (info status-code)
+  (redis* (car/publish "codes" status-code)))
 
 (defn drain [body]
   (let [body (slurp body)]
