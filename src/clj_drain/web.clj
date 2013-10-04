@@ -8,7 +8,8 @@
 
 (defn drain [body]
   (let [body (slurp body)]
-    (info (re-find #"status=([0-9]+)" body))))
+    (let [status-code (re-find #"status=([0-9]+)" body)]
+      (if-not (nil? status-code) (info status-code)))))
 
 (defroutes all-routes
   (POST "/drain" {body :body}
