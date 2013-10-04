@@ -14,4 +14,5 @@
   (route/not-found "Page not found"))
 
 (defn -main [& [port]]
-  (run-server (site #'all-routes) {:port 5000}))
+  (let [port (Integer. (env :port))] port
+    (run-server (site #'all-routes) {:port port})))
