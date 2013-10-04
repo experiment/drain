@@ -7,10 +7,13 @@
         [compojure.handler :only [site]]
         [taoensso.carmine :as car :refer (wcar)]))
 
+(defn push-status [status-code]
+  (info status-code))
+
 (defn drain [body]
   (let [body (slurp body)]
     (let [status-code (re-find #"status=([0-9]+)" body)]
-      (if-not (nil? status-code) (info status-code)))))
+      (if-not (nil? status-code) (push-status status-code)))))
 
 (defroutes all-routes
   (POST "/drain" {body :body}
