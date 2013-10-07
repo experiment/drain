@@ -1,5 +1,6 @@
 (ns clj_drain.web
-  (:use [environ.core :refer [env]]
+  (:use [clojure.data.json :as json]
+        [environ.core :refer [env]]
         [taoensso.timbre :as timbre :refer (trace debug info warn error fatal spy with-log-level)]
         [org.httpkit.server]
         [compojure.core :only [defroutes GET POST DELETE ANY context]]
@@ -16,13 +17,14 @@
   `(car/wcar redis-conf ~@body))
 
 (defn push-status [status-code]
-  (info status-code)
-  (redis* (car/publish "codes" status-code)))
+  (let [hit {:code status-code}]
+    (info hit)
+    (redis* (car/publish "codes" (json-str hit)))))
 
 (defn drain [body]
   (let [body (slurp body)]
     (let [status-code (re-find #"status=([0-9]+)" body)]
-      (if-not (nil? status-code) (push-status status-code)))))
+      (if-not (nil? status-code) (push-status (nth status-code 1))))))
 
 (defroutes all-routes
   (POST "/drain" {body :body}
