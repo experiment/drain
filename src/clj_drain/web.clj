@@ -16,19 +16,23 @@
   (info redis-conf)
   `(car/wcar redis-conf ~@body))
 
-(defn push-status [status-code]
-  (let [hit {:code status-code}]
-    (info hit)
-    (redis* (car/publish "codes" (json-str hit)))))
+(defn push-hit [hit]
+  (info hit)
+  (redis* (car/publish "codes" (json-str hit))))
+
+(defn hit-hash [body]
+  {
+    :code (nth (re-find #"status=([0-9]+)" body) 1)
+    :path (nth (re-find #"path=(\S+)" body) 1)
+  })
 
 (defn drain [body]
-  (let [body (slurp body)]
-    (let [status-code (re-find #"status=([0-9]+)" body)]
-      (if-not (nil? status-code) (push-status (nth status-code 1))))))
+  (if-not (nil? (re-find #"router" body))
+    (push-hit (hit-hash body))))
 
 (defroutes all-routes
   (POST "/drain" {body :body}
-    (drain body)
+    (drain (slurp body))
     {:status 200})
   (route/not-found "Page not found"))
 
