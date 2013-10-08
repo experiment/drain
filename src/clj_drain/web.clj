@@ -21,9 +21,9 @@
   (info hit)
   (let [hit-str (generate-string hit)]
     (redis*
-      (car/publish "codes" hit-str)
-      (car/lpush "codes" hit-str)
-      (car/ltrim "codes" 0 100))))
+      (car/publish "hits" hit-str)
+      (car/lpush "hits" hit-str)
+      (car/ltrim "hits" 0 100))))
 
 (defn hit-hash [body]
   {
