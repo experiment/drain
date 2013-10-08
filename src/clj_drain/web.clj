@@ -1,11 +1,11 @@
 (ns clj_drain.web
-  (:use [clojure.data.json :as json]
-        [environ.core :refer [env]]
+  (:use [environ.core :refer [env]]
         [taoensso.timbre :as timbre :refer (trace debug info warn error fatal spy with-log-level)]
         [org.httpkit.server]
         [compojure.core :only [defroutes GET POST DELETE ANY context]]
         [compojure.route :only [not-found] :as route]
         [compojure.handler :only [site]]
+        [cheshire.core :refer :all]
         [taoensso.carmine :as car :refer (wcar)]
         [clj-librato.metrics :as metrics]))
 
@@ -19,7 +19,7 @@
 
 (defn push-hit [hit]
   (info hit)
-  (redis* (car/publish "codes" (json-str hit))))
+  (redis* (car/publish "codes" (generate-string hit))))
 
 (defn hit-hash [body]
   {
