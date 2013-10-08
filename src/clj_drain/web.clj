@@ -23,7 +23,7 @@
     (redis*
       (car/publish "hits" hit-str)
       (car/lpush "hits" hit-str)
-      (car/ltrim "hits" 0 100))))
+      (car/ltrim "hits" 0 1000))))
 
 (defn hit-hash [body]
   {
