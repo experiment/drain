@@ -6,7 +6,8 @@
         [compojure.core :only [defroutes GET POST DELETE ANY context]]
         [compojure.route :only [not-found] :as route]
         [compojure.handler :only [site]]
-        [taoensso.carmine :as car :refer (wcar)]))
+        [taoensso.carmine :as car :refer (wcar)]
+        [clj-librato.metrics :as metrics]))
 
 (def redis-conf
   (let [port (Integer. (env :redis-port)) host (String. (env :redis-host)) password (String. (env :redis-password))]

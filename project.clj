@@ -11,7 +11,8 @@
                  [environ "0.2.1"]
                  [com.taoensso/timbre "2.6.2"]
                  [http-kit "2.1.10"]
-                 [com.taoensso/carmine "2.2.3"]]
+                 [com.taoensso/carmine "2.2.3"]
+                 [clj-librato "0.0.3"]]
   :min-lein-version "2.0.0"
   :plugins [[environ/environ.lein "0.2.1"]]
   :hooks [environ.leiningen.hooks]
