@@ -25,10 +25,16 @@
       (car/lpush "hits" hit-str)
       (car/ltrim "hits" 0 1000))))
 
+(defn extract-match [regex body]
+  (nth (re-find regex body) 1))
+
 (defn hit-hash [body]
   {
-    :code (nth (re-find #"status=([0-9]+)" body) 1)
-    :path (nth (re-find #"path=(\S+)" body) 1)
+    :code (extract-match #"status=([0-9]+)" body)
+    :host (extract-match #"host=(\S+)" body)
+    :path (extract-match #"path=(\S+)" body)
+    :connect (extract-match #"connect=(\d+)ms" body)
+    :service (extract-match #"service=(\d+)ms" body)
   })
 
 (defn drain [body]
