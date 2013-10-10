@@ -9,6 +9,10 @@
         [taoensso.carmine :as car :refer (wcar)]
         [clj-librato.metrics :as metrics]))
 
+(def librato-conf
+  (let [email (String. (env :librato-email)) token (String. (env :librato-token))]
+    {:email email :token token}))
+
 (def redis-conf
   (let [port (Integer. (env :redis-port)) host (String. (env :redis-host)) password (String. (env :redis-password))]
     {:spec {:host host :port port :password password}}))
@@ -25,6 +29,10 @@
       (car/lpush "hits" hit-str)
       (car/ltrim "hits" 0 1000))))
 
+(defn push-gauge [gauge]
+  (metrics/collate
+    (librato-conf :email) (librato-conf :token) gauge []))
+
 (defn extract-match [regex body]
   (nth (re-find regex body) 1))
 
@@ -37,9 +45,17 @@
     :service (extract-match #"service=(\d+)ms" body)
   })
 
+(defn connections-gauge [body]
+  [
+    {:name "postgres" :source "active-connections" :value (extract-match #"sample#active-connections=(\d+)" body)}
+    {:name "postgres" :source "waiting-connections" :value (extract-match #"sample#waiting-connections=(\d+)" body)}
+  ])
+
 (defn drain [body]
   (if (re-find #"router" body)
-    (push-hit (hit-hash body))))
+    (push-hit (hit-hash body)))
+  (if (re-find #"heroku-postgres" body)
+    (push-gauge (connections-gauge body))))
 
 (defroutes all-routes
   (POST "/drain" {body :body}
