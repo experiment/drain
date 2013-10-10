@@ -18,11 +18,9 @@
     {:spec {:host host :port port :password password}}))
 
 (defmacro redis* [& body]
-  (info redis-conf)
   `(car/wcar redis-conf ~@body))
 
 (defn push-hit [hit]
-  (info hit)
   (let [hit-str (generate-string hit)]
     (redis*
       (car/publish "hits" hit-str)
