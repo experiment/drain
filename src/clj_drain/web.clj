@@ -37,9 +37,17 @@
     :service (extract-match #"service=(\d+)ms" body)
   })
 
+(defn stat-hash [body]
+  {
+    :active-connections (extract-match #"sample#active-connections=(\d+)" body)
+    :waiting-connections (extract-match #"sample#waiting-connections=(\d+)" body)
+  })
+
 (defn drain [body]
   (if (re-find #"router" body)
-    (push-hit (hit-hash body))))
+    (push-hit (hit-hash body)))
+  (if (re-find #"heroku-postgres" body)
+    (info (stat-hash body))))
 
 (defroutes all-routes
   (POST "/drain" {body :body}
