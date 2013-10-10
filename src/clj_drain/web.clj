@@ -38,7 +38,7 @@
   })
 
 (defn drain [body]
-  (if-not (nil? (re-find #"router" body))
+  (if (re-find #"router" body)
     (push-hit (hit-hash body))))
 
 (defroutes all-routes
