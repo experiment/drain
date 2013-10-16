@@ -51,7 +51,7 @@
 
 (defn dyno-gauge [body]
   [{
-    :name "dyno"
+    :name "dyno.memory_total"
     :source (extract-match #"source=(\S+)" body)
     :value (extract-match #"sample#memory_total=([\d|\.]+)MB" body)
   }])
