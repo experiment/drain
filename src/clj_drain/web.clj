@@ -7,7 +7,8 @@
         [compojure.handler :only [site]]
         [cheshire.core :refer :all]
         [taoensso.carmine :as car :refer (wcar)]
-        [clj-librato.metrics :as metrics]))
+        [clj-librato.metrics :as metrics]
+        [clj-time.coerce :as cljc]))
 
 (def librato-conf
   (let [email (String. (env :librato-email)) token (String. (env :librato-token))]
@@ -38,6 +39,9 @@
 (defn extract-match [regex body]
   (nth (re-find regex body) 1))
 
+(defn string-to-seconds-from-epoc [string]
+  (quot (cljc/to-long (cljc/from-string string)) 1000))
+
 (defn hit-hash [body]
   {
     :code (extract-match #"status=([0-9]+)" body)
@@ -63,7 +67,7 @@
 (defn deploy-annotation [body]
   {
     :title (extract-match #"heroku\[api\]:\sDeploy\s(.+)" body)
-    ; :start_time (extract-match #"^(\S+)" body)
+    :start_time (string-to-seconds-from-epoc (extract-match #"^(\S+)" body))
   })
 
 (defn drain [body]
