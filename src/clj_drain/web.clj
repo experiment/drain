@@ -31,6 +31,10 @@
   (metrics/collate
     (librato-conf :email) (librato-conf :token) gauge []))
 
+(defn push-annotation [annotation-name annotation]
+  (metrics/create-annotation
+    (librato-conf :email) (librato-conf :token) annotation-name annotation))
+
 (defn extract-match [regex body]
   (nth (re-find regex body) 1))
 
@@ -56,13 +60,21 @@
     :value (extract-match #"sample#memory_total=([\d|\.]+)MB" body)
   }])
 
+(defn deploy-annotation [body]
+  {
+    :title (extract-match #"heroku\[api\]:\sDeploy\s(.+)" body)
+    ; :start_time (extract-match #"^(\S+)" body)
+  })
+
 (defn drain [body]
   (if (re-find #"router" body)
     (push-hit (hit-hash body)))
   (if (re-find #"heroku-postgres" body)
     (push-gauge (connections-gauge body)))
   (if (re-find #"sample#memory_total" body)
-    (push-gauge (dyno-gauge body))))
+    (push-gauge (dyno-gauge body)))
+  (if (re-find #"heroku\[api\]:\sDeploy" body)
+    (push-annotation "deploy" (deploy-annotation body))))
 
 (defroutes all-routes
   (POST "/drain" {body :body}
