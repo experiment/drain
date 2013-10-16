@@ -78,8 +78,8 @@
   (if (re-find #"sample#memory_total" body)
     (push-gauge (dyno-gauge body)))
   (if (re-find #"heroku\[api\]:\sDeploy" body)
-    (info body)
-    (push-annotation "deploy" (deploy-annotation body))))
+    (info (deploy-annotation body))))
+    ; (push-annotation "deploy" (deploy-annotation body))))
 
 (defroutes all-routes
   (POST "/drain" {body :body}
