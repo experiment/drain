@@ -49,11 +49,20 @@
     {:name "postgres" :source "waiting-connections" :value (extract-match #"sample#waiting-connections=(\d+)" body)}
   ])
 
+(defn dyno-gauge [body]
+  [{
+    :name "dyno"
+    :source (extract-match #"source=(\S+)" body)
+    :value (extract-match #"sample#memory_total=([\d|\.]+)MB" body)
+  }])
+
 (defn drain [body]
   (if (re-find #"router" body)
     (push-hit (hit-hash body)))
   (if (re-find #"heroku-postgres" body)
-    (push-gauge (connections-gauge body))))
+    (push-gauge (connections-gauge body)))
+  (if (re-find #"sample#memory_total" body)
+    (push-gauge (dyno-gauge body))))
 
 (defroutes all-routes
   (POST "/drain" {body :body}
