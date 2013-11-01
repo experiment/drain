@@ -49,6 +49,7 @@
     :path (extract-match #"path=(\S+)" body)
     :connect (extract-match #"connect=(\d+)ms" body)
     :service (extract-match #"service=(\d+)ms" body)
+    :ip (extract-match #"fwd=.((\d+\.?){4})" body)
   })
 
 (defn connections-gauge [body]
