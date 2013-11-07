@@ -78,7 +78,7 @@
     (push-gauge (connections-gauge body)))
   (if (re-find #"sample#memory_total" body)
     (push-gauge (dyno-gauge body)))
-  (if (re-find #"heroku\[api\]:\sDeploy" body)
+  (if (re-find #"(?i)heroku\[api\]:\sdeploy" body)
     (info (deploy-annotation body))))
     ; (push-annotation "deploy" (deploy-annotation body))))
 
