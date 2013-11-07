@@ -67,7 +67,7 @@
 
 (defn deploy-annotation [body]
   {
-    :title (extract-match #"heroku\[api\]:\sDeploy\s(.+)" body)
+    :title (extract-match #"Deploy\s(.+)" body)
     :start_time (string-to-seconds-from-epoc (extract-match #"^(\S+)" body))
   })
 
@@ -79,7 +79,7 @@
     (push-gauge (connections-gauge body)))
   (if (re-find #"sample#memory_total" body)
     (push-gauge (dyno-gauge body)))
-  (if (re-find #"(?i)heroku\[api\]:\sdeploy" body)
+  (if (re-find #"heroku api - Deploy" body)
     (info (deploy-annotation body))))
     ; (push-annotation "deploy" (deploy-annotation body))))
 
