@@ -72,7 +72,7 @@
   })
 
 (defn drain [body]
-  (info (body))
+  (info body)
   (if (re-find #"router" body)
     (push-hit (hit-hash body)))
   (if (re-find #"heroku-postgres" body)
