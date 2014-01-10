@@ -73,6 +73,7 @@
   }])
 
 (defn deploy-annotation [body]
+  (info body)
   {
     :title (extract-match #"Deploy\s(.+)" body)
     :start_time (string-to-seconds-from-epoc (extract-match #"^(\S+)" body))
@@ -87,7 +88,7 @@
     (push-gauge (dyno-gauge body)))
   (if (re-find #"sql\.active_record" body)
     (push-gauge (dyno-connections-gauge body)))
-  (if (re-find #"heroku api - Deploy" body)
+  (if (re-find #"heroku api" body)
     (info (deploy-annotation body))))
     ; (push-annotation "deploy" (deploy-annotation body))))
 
