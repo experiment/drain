@@ -87,7 +87,7 @@
   (if (re-find #"sample#memory_total" body)
     (push-gauge (dyno-gauge body)))
   (if (re-find #"sql\.active_record" body)
-    (info (dyno-connections-gauge body)))
+    (push-gauge (dyno-connections-gauge body)))
   (if (re-find #"heroku api - Deploy" body)
     (info (deploy-annotation body))))
     ; (push-annotation "deploy" (deploy-annotation body))))
