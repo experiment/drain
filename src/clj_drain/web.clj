@@ -52,7 +52,7 @@
     :ip (extract-match #"fwd=.((\d+\.?){4})" body)
   })
 
-(defn connections-gauge [body]
+(defn postgres-connections-gauge [body]
   [
     {:name "postgres" :source "active-connections" :value (extract-match #"sample#active-connections=(\d+)" body)}
     {:name "postgres" :source "waiting-connections" :value (extract-match #"sample#waiting-connections=(\d+)" body)}
@@ -65,6 +65,13 @@
     :value (extract-match #"sample#memory_total=([\d|\.]+)MB" body)
   }])
 
+(defn dyno-connections-gauge [body]
+  [{
+    :name "dyno.connections"
+    :source (extract-match #"app\[(\D+\.\d+)\]" body)
+    :value (extract-match #"connections=(\d+)" body)
+  }])
+
 (defn deploy-annotation [body]
   {
     :title (extract-match #"Deploy\s(.+)" body)
@@ -75,9 +82,11 @@
   (if (re-find #"router" body)
     (push-hit (hit-hash body)))
   (if (re-find #"heroku-postgres" body)
-    (push-gauge (connections-gauge body)))
+    (push-gauge (postgres-connections-gauge body)))
   (if (re-find #"sample#memory_total" body)
     (push-gauge (dyno-gauge body)))
+  (if (re-find #"sql.active_record")
+    (info (dyno-connections-gauge body)))
   (if (re-find #"heroku api - Deploy" body)
     (info (deploy-annotation body))))
     ; (push-annotation "deploy" (deploy-annotation body))))
