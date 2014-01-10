@@ -69,7 +69,7 @@
   (info body)
   [{
     :name "dyno.connections"
-    :source (extract-match #"app\[(\D+\.\d+)\]" body)
+    :source (extract-match #"host app (\D+\.\d+)" body)
     :value (extract-match #"connections=(\d+)" body)
   }])
 
