@@ -66,7 +66,6 @@
   }])
 
 (defn dyno-connections-gauge [body]
-  (info body)
   [{
     :name "dyno.connections"
     :source (extract-match #"host app (\D+\.\d+)" body)
