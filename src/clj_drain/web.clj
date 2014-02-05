@@ -8,7 +8,8 @@
         [cheshire.core :refer :all]
         [taoensso.carmine :as car :refer (wcar)]
         [clj-librato.metrics :as metrics]
-        [clj-time.coerce :as cljc]))
+        [clj-time.coerce :as cljc]
+        [org.httpkit.timer :as timer]))
 
 (def librato-conf
   (let [email (String. (env :librato-email)) token (String. (env :librato-token))]
@@ -92,6 +93,11 @@
     (info (deploy-annotation body))))
     ; (push-annotation "deploy" (deploy-annotation body))))
 
+(defn tick [interval]
+  (timer/schedule-task interval
+    (println "tick")
+    (tick interval)))
+
 (defroutes all-routes
   (POST "/drain" {body :body}
     (drain (slurp body))
@@ -100,4 +106,5 @@
 
 (defn -main [& [port]]
   (let [port (Integer. (env :port))] port
-    (run-server (site #'all-routes) {:port port})))
+    (run-server (site #'all-routes) {:port port}))
+  (tick 1000))
