@@ -37,6 +37,9 @@
   (metrics/collate
     (librato-conf :email) (librato-conf :token) gauge []))
 
+(defn push-connect [time]
+  (redis* (car/sadd "connects" time)))
+
 (defn push-annotation [annotation-name annotation]
   (metrics/create-annotation
     (librato-conf :email) (librato-conf :token) annotation-name annotation))
@@ -86,7 +89,8 @@
 
 (defn drain [body]
   (if (re-find #"router" body)
-    (push-hit (hit-hash body)))
+    (push-hit (hit-hash body))
+    (push-connect (extract-match #"connect=(\d+)ms" body)))
   (if (re-find #"heroku-postgres" body)
     (push-gauge (postgres-connections-gauge body)))
   (if (re-find #"sample#memory_total" body)
