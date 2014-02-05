@@ -117,4 +117,4 @@
 (defn -main [& [port]]
   (let [port (Integer. (env :port))] port
     (run-server (site #'all-routes) {:port port}))
-  (tick 30000))
+  (tick 60000))
