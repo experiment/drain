@@ -11,6 +11,10 @@
         [clj-time.coerce :as cljc]
         [org.httpkit.timer :as timer]))
 
+(defn average [set]
+  (let [numbers (map read-string set)]
+    (/ (apply + numbers) (count numbers))))
+
 (def librato-conf
   (let [email (String. (env :librato-email)) token (String. (env :librato-token))]
     {:email email :token token}))
@@ -95,8 +99,10 @@
 
 (defn tick [interval]
   (timer/schedule-task interval
-    (println "tick")
-    (tick interval)))
+    (tick interval)
+    (let [connects (redis* (car/smembers "connects"))]
+      (redis* (car/del "connects"))
+      (info (average connects)))))
 
 (defroutes all-routes
   (POST "/drain" {body :body}
@@ -107,4 +113,4 @@
 (defn -main [& [port]]
   (let [port (Integer. (env :port))] port
     (run-server (site #'all-routes) {:port port}))
-  (tick 1000))
+  (tick 30000))
