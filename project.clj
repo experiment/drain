@@ -11,7 +11,7 @@
                  [com.taoensso/timbre "2.6.2"]
                  [http-kit "2.1.10"]
                  [cheshire "5.2.0"]
-                 [com.taoensso/carmine "2.2.3"]
+                 [com.taoensso/carmine "2.4.6"]
                  [clj-librato "0.0.3"]
                  [clj-time "0.6.0"]]
   :min-lein-version "2.0.0"
