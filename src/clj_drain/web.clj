@@ -26,11 +26,6 @@
 (defmacro redis* [& body]
   `(car/wcar redis-conf ~@body))
 
-(defn record-average-connection []
-  (let [connects (redis* (car/smembers "connects"))]
-    (redis* (car/del "connects"))
-    (info (average connects))))
-
 (defn push-hit [hit]
   (let [hit-str (generate-string hit)]
     (redis*
@@ -103,10 +98,15 @@
     (info (deploy-annotation body))))
     ; (push-annotation "deploy" (deploy-annotation body))))
 
+(defn push-average-connection []
+  (let [connects (redis* (car/smembers "connects"))]
+    (redis* (car/del "connects"))
+    (push-gauge [{:name "connect" :value (average connects)}])))
+
 (defn tick [interval]
   (timer/schedule-task interval
     (tick interval)
-    (record-average-connection)))
+    (push-average-connection)))
 
 (defroutes all-routes
   (POST "/drain" {body :body}
