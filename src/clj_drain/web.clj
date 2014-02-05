@@ -8,7 +8,12 @@
         [cheshire.core :refer :all]
         [taoensso.carmine :as car :refer (wcar)]
         [clj-librato.metrics :as metrics]
-        [clj-time.coerce :as cljc]))
+        [clj-time.coerce :as cljc]
+        [org.httpkit.timer :as timer]))
+
+(defn average [set]
+  (let [numbers (map read-string set)]
+    (/ (apply + numbers) (count numbers))))
 
 (def librato-conf
   (let [email (String. (env :librato-email)) token (String. (env :librato-token))]
@@ -26,7 +31,8 @@
     (redis*
       (car/publish "hits" hit-str)
       (car/lpush "hits" hit-str)
-      (car/ltrim "hits" 0 1000))))
+      (car/ltrim "hits" 0 1000)
+      (car/sadd "connects" (hit :connect)))))
 
 (defn push-gauge [gauge]
   (metrics/collate
@@ -92,6 +98,16 @@
     (info (deploy-annotation body))))
     ; (push-annotation "deploy" (deploy-annotation body))))
 
+(defn push-average-connection []
+  (let [connects (redis* (car/smembers "connects"))]
+    (redis* (car/del "connects"))
+    (push-gauge [{:name "connect" :value (average connects)}])))
+
+(defn tick [interval]
+  (timer/schedule-task interval
+    (tick interval)
+    (push-average-connection)))
+
 (defroutes all-routes
   (POST "/drain" {body :body}
     (drain (slurp body))
@@ -100,4 +116,5 @@
 
 (defn -main [& [port]]
   (let [port (Integer. (env :port))] port
-    (run-server (site #'all-routes) {:port port})))
+    (run-server (site #'all-routes) {:port port}))
+  (tick 60000))
