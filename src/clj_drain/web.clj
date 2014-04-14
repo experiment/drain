@@ -32,6 +32,7 @@
       (car/publish "hits" hit-str)
       (car/lpush "hits" hit-str)
       (car/ltrim "hits" 0 1000)
+      (car/hincrby "hit_codes" (hit :code) 1)
       (car/sadd "connects" (hit :connect)))))
 
 (defn push-gauge [gauge]
@@ -98,6 +99,11 @@
     (info (deploy-annotation body))))
     ; (push-annotation "deploy" (deploy-annotation body))))
 
+(defn push-hit-code-counts []
+  (let [codes (redis* (car/hgetall "hit_codes"))]
+    (redis* (car/del "hit_codes"))
+    (info codes)))
+
 (defn push-average-connection []
   (let [connects (redis* (car/smembers "connects"))]
     (redis* (car/del "connects"))
@@ -106,6 +112,7 @@
 (defn tick [interval]
   (timer/schedule-task interval
     (tick interval)
+    (push-hit-code-counts)
     (push-average-connection)))
 
 (defroutes all-routes
