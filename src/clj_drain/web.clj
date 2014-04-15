@@ -101,7 +101,7 @@
     ; (push-annotation "deploy" (deploy-annotation body))))
 
 (defn codes_to_gauge [m]
-  {:name "request_codes_drain" :source (key m) :value (val m)})
+  {:name "request_codes" :source (key m) :value (val m)})
 
 (defn push-hit-code-counts []
   (let [codes (redis* (car/hgetall* "hit_codes"))]
