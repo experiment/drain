@@ -7,7 +7,7 @@
                  [compojure "1.1.1"]
                  [ring/ring-jetty-adapter "1.1.0"]
                  [ring/ring-devel "1.1.0"]
-                 [environ "0.2.1"]
+                 [environ "0.4.0"]
                  [com.taoensso/timbre "2.6.2"]
                  [http-kit "2.1.10"]
                  [cheshire "5.2.0"]

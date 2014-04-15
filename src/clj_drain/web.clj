@@ -16,15 +16,16 @@
     (/ (apply + numbers) (count numbers))))
 
 (def librato-conf
-  (let [email (String. (env :librato-email)) token (String. (env :librato-token))]
-    {:email email :token token}))
+  {:email (env :librato-email)
+   :token (env :librato-token)})
 
 (def redis-conf
-  (let [port (Integer. (env :redis-port)) host (String. (env :redis-host)) password (String. (env :redis-password))]
-    {:spec {:host host :port port :password password}}))
+  {:host (env :redis-host)
+   :port (Integer/parseInt (env :redis-port))
+   :password (env :redis-password)})
 
 (defmacro redis* [& body]
-  `(car/wcar redis-conf ~@body))
+  `(car/wcar {:spec redis-conf} ~@body))
 
 (defn push-hit [hit]
   (let [hit-str (generate-string hit)]
