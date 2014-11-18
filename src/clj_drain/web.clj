@@ -34,7 +34,9 @@
       (car/lpush "hits" hit-str)
       (car/ltrim "hits" 0 1000)
       (car/hincrby "hit_codes" (hit :code) 1)
-      (car/sadd "connects" (hit :connect)))))
+      (car/sadd "connects" (hit :connect))
+      (if (hit :heroku_error)
+        (car/hincrby "hit_errors" (hit :heroku_error) 1)))))
 
 (defn push-gauge [gauge]
   (metrics/collate
@@ -53,6 +55,7 @@
 (defn hit-hash [body]
   {
     :code (extract-match #"status=([0-9]+)" body)
+    :heroku_error (extract-match #"code=(\w\d\d)" body)
     :host (extract-match #"host=(\S+)" body)
     :path (extract-match #"path=(\S+)" body)
     :connect (extract-match #"connect=(\d+)ms" body)
@@ -103,10 +106,17 @@
 (defn codes_to_gauge [m]
   {:name "request_codes" :source (key m) :value (val m)})
 
-(defn push-hit-code-counts []
+(defn errors_to_gauge [m]
+  {:name "request_heroku_errors" :source (key m) :value (val m)})
+
+(defn push-hit-counts []
   (let [codes (redis* (car/hgetall* "hit_codes"))]
     (redis* (car/del "hit_codes"))
-    (push-gauge (map codes_to_gauge codes))))
+    (push-gauge (map codes_to_gauge codes)))
+  (let [codes (redis* (car/hgetall* "hit_errors"))]
+    (redis* (car/del "hit_errors"))
+    (push-gauge (map errors_to_gauge codes))))
+
 
 (defn push-average-connection []
   (let [connects (redis* (car/smembers "connects"))]
@@ -116,7 +126,7 @@
 (defn tick [interval]
   (timer/schedule-task interval
     (tick interval)
-    (push-hit-code-counts)
+    (push-hit-counts)
     (push-average-connection)))
 
 (defroutes all-routes
